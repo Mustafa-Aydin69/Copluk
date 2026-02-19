@@ -1,32 +1,42 @@
 class Solution {
-
     public boolean isMatch(String s, String p) {
-        return matchHelper(s, p, 0, 0);
-    }
 
-    private boolean matchHelper(String s, String p, int i, int j) {
+        int m = s.length();
+        int n = p.length();
 
-        // pattern bittiyse string de bitmeli
-        if (j == p.length()) {
-            return i == s.length();
+        boolean[][] dp = new boolean[m + 1][n + 1];
+
+        dp[0][0] = true;
+
+        // pattern baştan boş string ile eşleşebilir mi?
+        for (int j = 2; j <= n; j++) {
+            if (p.charAt(j - 1) == '*') {
+                dp[0][j] = dp[0][j - 2];
+            }
         }
 
-        // şu anki karakter eşleşiyor mu?
-        boolean firstMatch = (i < s.length() &&
-                (p.charAt(j) == s.charAt(i) || p.charAt(j) == '.'));
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
 
-        // sıradaki karakter '*' mı?
-        if (j + 1 < p.length() && p.charAt(j + 1) == '*') {
+                char sc = s.charAt(i - 1);
+                char pc = p.charAt(j - 1);
 
-            // 1️⃣ '*' hiç kullanılmaz → pattern 2 ileri
-            // 2️⃣ '*' kullanılır → string 1 ileri, pattern aynı kalır
-            return (matchHelper(s, p, i, j + 2) ||
-                    (firstMatch && matchHelper(s, p, i + 1, j)));
+                if (pc == sc || pc == '.') {
+                    dp[i][j] = dp[i - 1][j - 1];
+                }
+
+                else if (pc == '*') {
+                    dp[i][j] = dp[i][j - 2];
+
+                    char prev = p.charAt(j - 2);
+
+                    if (prev == sc || prev == '.') {
+                        dp[i][j] |= dp[i - 1][j];
+                    }
+                }
+            }
         }
 
-        else {
-            // normal karakter
-            return firstMatch && matchHelper(s, p, i + 1, j + 1);
-        }
+        return dp[m][n];
     }
 }
